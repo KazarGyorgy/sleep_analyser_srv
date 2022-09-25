@@ -33,8 +33,20 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
+    public void addRole2User(Long Taj, String rolename) {
+    User user = userRepository.findByTajNumber(Taj);
+    Role role = roleRepository.findByRoleName(rolename);
+        log.info("User " + user.getTajNumber() + " and the role " + role.getRoleName() + " are under joining");
+    user.getRoles().add(role);
+    }
+
+    @Override
     public User getUserByTaj(Long taj) {
         return userRepository.findByTajNumber(taj);
     }
 
+    @Override
+    public List<User> getUsers() {
+        return userRepository.findAll();
+    }
 }

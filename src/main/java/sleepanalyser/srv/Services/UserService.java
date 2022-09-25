@@ -9,6 +9,10 @@ public interface UserService {
     User saveUser(User user);
     Role saveRole(Role role);
 
+    void addRole2User(Long Taj, String rolename);
+
     User getUserByTaj(Long taj);
+
+    List<User> getUsers();
 
 }
