@@ -1,4 +1,4 @@
-package sleepanalyser.srv.Services.Impl;
+package sleepanalyser.srv.services.Impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,7 +7,7 @@ import sleepanalyser.srv.Entities.Role;
 import sleepanalyser.srv.Entities.User;
 import sleepanalyser.srv.Repositories.RoleRepository;
 import sleepanalyser.srv.Repositories.UserRepository;
-import sleepanalyser.srv.Services.UserService;
+import sleepanalyser.srv.services.UserService;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -22,27 +22,22 @@ public class UserServiceImp implements UserService {
 
     @Override
     public User saveUser(User user) {
-        log.info("User " + user.getTajNumber() + "is being saved");
+        log.info("User " + user.getUsername() + "is being saved");
         return userRepository.save(user);
     }
 
     @Override
-    public Role saveRole(Role role) {
-        log.info("Role " + role.getRoleName() + "is being saved");
-        return roleRepository.save(role);
-    }
-
-    @Override
-    public void addRole2User(Long Taj, String rolename) {
-    User user = userRepository.findByTajNumber(Taj);
-    Role role = roleRepository.findByRoleName(rolename);
-        log.info("User " + user.getTajNumber() + " and the role " + role.getRoleName() + " are under joining");
+    public void addUserToRole(String username, String rolename) {
+    User user = userRepository.findByUsername(username);
+    Role role = roleRepository.findByName(rolename);
+        log.info("User " + user.getUsername() + " and the role " + role.getName() + " are under joining");
     user.getRoles().add(role);
     }
 
     @Override
-    public User getUserByTaj(Long taj) {
-        return userRepository.findByTajNumber(taj);
+    public User getUserByUsername(String username) {
+        log.info("trying to get {}", username);
+        return userRepository.findByUsername(username);
     }
 
     @Override
