@@ -5,16 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-
-@Table(name = "role")
-@Entity()
+@Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String roleName;
-    private String roleDescription;
+    private String name;
+    private String description;
 }
