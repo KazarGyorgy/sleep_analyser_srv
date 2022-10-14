@@ -19,13 +19,18 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
-    @GetMapping("/users")
-    public ResponseEntity<List<User>> getUsers() {
-        return ResponseEntity.ok().body(userService.getUsers());
-    }
-    @PostMapping()
-    public ResponseEntity<User> saveUser(@RequestBody User user) {
+
+    @PostMapping("{roleType}")
+    public ResponseEntity<User> saveUser(@RequestBody User user, @PathVariable String roleType) {
         URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/user").toUriString());
-        return  ResponseEntity.created(uri).body(userService.saveUser(user));
+
+        return  ResponseEntity.created(uri).body(userService.saveUser(user, roleType.toUpperCase()));
+    }
+
+    @GetMapping("/users/{roleType}")
+    public ResponseEntity<List<User>> getUsersByRole(@PathVariable String roleType) {
+    log.info(roleType);
+
+    return ResponseEntity.ok().body(this.userService.getUsersByRoleName(roleType.toUpperCase()));
     }
 }

@@ -2,6 +2,9 @@ package sleepanalyser.srv.services.Impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,9 +18,12 @@ import sleepanalyser.srv.Repositories.UserRepository;
 import sleepanalyser.srv.services.UserService;
 
 import javax.transaction.Transactional;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -29,13 +35,25 @@ public class UserServiceImp implements UserService, UserDetailsService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public User saveUser(User user) {
+    public User saveUser(User user, String rolename) {
         log.info("User " + user.getUsername() + "is being saved");
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        String generatedPassword = RandomStringUtils.random( 15, characters );
+        System.out.println(generatedPassword);
+        if (user.getUsername() == null || user.getPassword().isEmpty() && user.getUsername().isEmpty()) {
+            user.setPassword(generatedPassword);
+
+            user.setUsername(user.getLastName().toLowerCase().substring(0, 2) + user.getFirstName());
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        this.addUserToRole(savedUser.getUsername(), "DOCTOR");
+
+        return  savedUser;
     }
 
     @Override
+
     public void addUserToRole(String username, String rolename) {
         User user = userRepository.findByUsername(username);
         Role role = roleRepository.findByName(rolename);
@@ -50,8 +68,8 @@ public class UserServiceImp implements UserService, UserDetailsService {
     }
 
     @Override
-    public List<User> getUsers() {
-        return userRepository.findAll();
+    public List<User> getUsersByRoleName(String rolename) {
+        return userRepository.findByRolesName(rolename);
     }
 
     @Override

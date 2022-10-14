@@ -1,7 +1,6 @@
 package sleepanalyser.srv.services;
 
 import sleepanalyser.srv.Entities.User;
-
 import java.util.List;
 
 public interface UserService {
@@ -11,14 +10,14 @@ public interface UserService {
       * @param user
      * @return the saved user entity.
      */
-    User saveUser(User user);
+    User saveUser(User user, String rolename);
 
     /**
      * this function mapping role and user .
      * @param username
      * @param rolename
      */
-    void addUserToRole(String username, String rolename);
+     void addUserToRole(String username, String rolename);
 
 
     /**
@@ -28,6 +27,8 @@ public interface UserService {
      */
     User getUserByUsername(String username);
 
-    List<User> getUsers();
+    List<User> getUsersByRoleName(String roleName);
+
+
 
 }
