@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import sleepanalyser.srv.Dto.ChangePasswordDto;
 import sleepanalyser.srv.Dto.UserDetailsDTO;
 import sleepanalyser.srv.Entities.User;
 import sleepanalyser.srv.services.UserService;
@@ -59,6 +60,12 @@ public class UserController {
     @PatchMapping("/{userId}")
     public void updateUser(@PathVariable String userId, @RequestBody User user) throws ChangeSetPersister.NotFoundException {
         this.userService.updateUser(userId,user);
+    }
+
+    @PatchMapping("/change-password")
+    public boolean changePassword(@RequestBody ChangePasswordDto dto){
+        boolean res = userService.changePasword(dto.getOldPassword(),dto.newPassword);
+        return res;
     }
     private UserDetailsDTO convertUserToDto(User user) {
         UserDetailsDTO dto = modelMapper.map(user, UserDetailsDTO.class);

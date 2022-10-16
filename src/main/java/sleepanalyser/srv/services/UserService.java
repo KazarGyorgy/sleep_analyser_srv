@@ -34,4 +34,6 @@ public interface UserService {
     boolean deleteUser(String userId);
 
     User updateUser(String userId, User user) throws ChangeSetPersister.NotFoundException;
+
+    boolean changePasword( String oldPassword, String newPassword);
 }
