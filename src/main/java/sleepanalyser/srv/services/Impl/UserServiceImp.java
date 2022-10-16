@@ -15,6 +15,7 @@ import sleepanalyser.srv.Entities.Role;
 import sleepanalyser.srv.Entities.User;
 import sleepanalyser.srv.Repositories.RoleRepository;
 import sleepanalyser.srv.Repositories.UserRepository;
+import sleepanalyser.srv.services.EmailService;
 import sleepanalyser.srv.services.UserService;
 
 import javax.persistence.EntityNotFoundException;
@@ -31,6 +32,8 @@ public class UserServiceImp implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private final EmailService emailService;
 
     @Override
     public User saveUser(User user, String rolename) {
@@ -52,6 +55,18 @@ public class UserServiceImp implements UserService, UserDetailsService {
             User dr = userRepository.findByUsername(username);
             user.setDoctor(dr);
         }
+
+        String emailBody = "Köszöntünk rendszerünkben! \n " +
+                "A bejelentkezéshez szükséged lesz a felhasználónevedre" +
+                " és jelszavadra!\n" +
+                "Ezeket a rendszer automatikusan generálja, első bejelentkezés után kérlek változtasd " +
+                "meg a jelszavad!\n A felhasználóneved : " + user.getUsername() + " jelszavad pedig : "
+                + generatedPassword;
+
+        emailService.sendLoginCredentials(user.getEmail(),
+                "Sikeres regisztráció!", emailBody);
+
+
         User savedUser = userRepository.save(user);
         this.addUserToRole(savedUser.getUsername(), rolename.toUpperCase());
 
