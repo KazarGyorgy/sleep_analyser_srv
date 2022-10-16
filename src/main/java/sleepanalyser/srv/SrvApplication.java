@@ -1,5 +1,6 @@
 package sleepanalyser.srv;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -36,15 +37,19 @@ public class SrvApplication {
         return new WebMvcConfigurerAdapter() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("http://localhost:4200");
+                registry.addMapping("/**").allowedOrigins("http://localhost:4200").allowedMethods("GET", "POST", "PATCH","DELETE");
             }
         };
+    }
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
 
 //    @Bean
 //    CommandLineRunner run(UserService userService, RoleService roleService) {
 //        return args -> {
-//            roleService.saveRole(new Role(null, "USER", "The User role"));
+//            roleService.saveRole(new Role(null, "PATIENT", "The patient role"));
 //            roleService.saveRole(new Role(null, "ADMIN", "Admin role"));
 //            roleService.saveRole(new Role(null, "DOCTOR", "Doctor role"));
 //            userService.saveUser(new User(null, "György", "Kazár", "kgyuri",

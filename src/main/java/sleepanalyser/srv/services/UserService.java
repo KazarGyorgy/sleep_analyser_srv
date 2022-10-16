@@ -1,5 +1,6 @@
 package sleepanalyser.srv.services;
 
+import org.springframework.data.crossstore.ChangeSetPersister;
 import sleepanalyser.srv.Entities.User;
 import java.util.List;
 
@@ -30,5 +31,7 @@ public interface UserService {
     List<User> getUsersByRoleName(String roleName);
 
 
+    void deleteUser(String userId);
 
+    User updateUser(String userId, User user) throws ChangeSetPersister.NotFoundException;
 }

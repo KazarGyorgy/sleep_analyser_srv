@@ -3,9 +3,9 @@ package sleepanalyser.srv.services.Impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,12 +18,9 @@ import sleepanalyser.srv.Repositories.UserRepository;
 import sleepanalyser.srv.services.UserService;
 
 import javax.transaction.Transactional;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +35,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
     public User saveUser(User user, String rolename) {
         log.info("User " + user.getUsername() + "is being saved");
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        String generatedPassword = RandomStringUtils.random( 15, characters );
+        String generatedPassword = RandomStringUtils.random(15, characters);
         System.out.println(generatedPassword);
         if (user.getUsername() == null || user.getPassword().isEmpty() && user.getUsername().isEmpty()) {
             user.setPassword(generatedPassword);
@@ -47,9 +44,9 @@ public class UserServiceImp implements UserService, UserDetailsService {
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userRepository.save(user);
-        this.addUserToRole(savedUser.getUsername(), "DOCTOR");
+        this.addUserToRole(savedUser.getUsername(), rolename.toUpperCase());
 
-        return  savedUser;
+        return savedUser;
     }
 
     @Override
@@ -70,6 +67,30 @@ public class UserServiceImp implements UserService, UserDetailsService {
     @Override
     public List<User> getUsersByRoleName(String rolename) {
         return userRepository.findByRolesName(rolename);
+    }
+
+    @Override
+    public void deleteUser(String userId) {
+
+        userRepository.deleteById(Long.parseLong(userId));
+    }
+
+    @Override
+    public User updateUser(String userId, User user) throws ChangeSetPersister.NotFoundException {
+        User oldUser = userRepository.findById(Long.parseLong(userId)).orElseThrow(() -> new ChangeSetPersister.NotFoundException());
+
+        oldUser.setFirstName(user.getFirstName());
+        oldUser.setLastName(user.getLastName());
+        oldUser.setZip(user.getZip());
+        oldUser.setCity(user.getCity());
+        oldUser.setStreetAddress(user.getStreetAddress());
+        oldUser.setPhoneNumber(user.getPhoneNumber());
+        oldUser.setDrId(user.getDrId());
+        oldUser.setEmail(user.getEmail());
+        oldUser.setBirthdate(user.getBirthdate());
+
+
+        return userRepository.save(oldUser);
     }
 
     @Override

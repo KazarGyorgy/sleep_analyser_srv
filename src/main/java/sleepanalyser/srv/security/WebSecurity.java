@@ -15,8 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import sleepanalyser.srv.filter.AuthenticationFilter;
 import sleepanalyser.srv.filter.AuthorizationFilter;
 
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.*;
 import static org.springframework.security.config.http.SessionCreationPolicy.*;
 
 @EnableWebSecurity
@@ -40,9 +39,11 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManagerBean());
         authenticationFilter.setFilterProcessesUrl("/api/login");
         http.csrf().disable();
+        log.info(authenticationFilter.getUsernameParameter());
         http.sessionManagement().sessionCreationPolicy(STATELESS);
         http.authorizeRequests().antMatchers("/api/login/**", "/api/role/refresh-token").permitAll();
         http.authorizeRequests().antMatchers(GET, "/user/**").hasAnyAuthority("USER");
+        http.authorizeRequests().antMatchers(DELETE, "/user/**").hasAnyAuthority("ADMIN","DOCTOR");
         http.authorizeRequests().antMatchers(POST, "/user/**").hasAnyAuthority("DOCTOR", "ADMIN");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(authenticationFilter);
