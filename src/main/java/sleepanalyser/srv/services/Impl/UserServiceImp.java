@@ -43,6 +43,14 @@ public class UserServiceImp implements UserService, UserDetailsService {
             user.setUsername(user.getLastName().toLowerCase().substring(0, 2) + user.getFirstName());
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (rolename.equals("PATIENT")) {
+            String username = principal.toString();
+
+            User dr = userRepository.findByUsername(username);
+            user.setDoctor(dr);
+        }
         User savedUser = userRepository.save(user);
         this.addUserToRole(savedUser.getUsername(), rolename.toUpperCase());
 
