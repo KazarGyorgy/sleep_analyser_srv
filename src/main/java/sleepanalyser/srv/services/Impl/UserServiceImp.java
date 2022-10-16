@@ -17,6 +17,7 @@ import sleepanalyser.srv.Repositories.RoleRepository;
 import sleepanalyser.srv.Repositories.UserRepository;
 import sleepanalyser.srv.services.UserService;
 
+import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,9 +79,14 @@ public class UserServiceImp implements UserService, UserDetailsService {
     }
 
     @Override
-    public void deleteUser(String userId) {
+    public boolean deleteUser(String userId) {
 
-        userRepository.deleteById(Long.parseLong(userId));
+        try {
+            userRepository.deleteById(Long.parseLong(userId));
+        } catch (EntityNotFoundException e) {
+            throw new EntityNotFoundException(e.getMessage());
+        }
+        return true;
     }
 
     @Override

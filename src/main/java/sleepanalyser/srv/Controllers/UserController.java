@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -44,15 +45,15 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable String userId) {
+    public ResponseEntity<?> deleteUser(@PathVariable String userId) {
         log.info("delete started");
-        try {
-            this.userService.deleteUser(userId);
-            return ResponseEntity.ok().body("User deleted");
-        } catch(Exception e){
-            log.error(e.toString());
-            return ResponseEntity.badRequest().body(e.getMessage());
+       boolean isRemoved = userService.deleteUser(userId);
+
+        if (!isRemoved) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        return (ResponseEntity<?>) ResponseEntity.ok();
     }
 
     @PatchMapping("/{userId}")
