@@ -46,15 +46,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<?> deleteUser(@PathVariable String userId) {
-        log.info("delete started");
-       boolean isRemoved = userService.deleteUser(userId);
-
-        if (!isRemoved) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        return (ResponseEntity<?>) ResponseEntity.ok();
+    public boolean deleteUser(@PathVariable Long userId) {
+        log.info(String.valueOf(userId));
+       return userService.deleteUser(userId);
     }
 
     @PatchMapping("/{userId}")

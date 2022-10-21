@@ -13,7 +13,7 @@ public class UserDetailsDTO {
     private int zip;
     private String City;
     private String streetAddress;
-    private Long tajNumber;
+    private String tajNumber;
     private String drId;
     private String phoneNumber;
     private String email;

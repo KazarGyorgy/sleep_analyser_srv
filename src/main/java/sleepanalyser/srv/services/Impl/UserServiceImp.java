@@ -94,10 +94,10 @@ public class UserServiceImp implements UserService, UserDetailsService {
     }
 
     @Override
-    public boolean deleteUser(String userId) {
+    public boolean deleteUser(Long userId) {
 
         try {
-            userRepository.deleteById(Long.parseLong(userId));
+            userRepository.deleteById(userId);
         } catch (EntityNotFoundException e) {
             throw new EntityNotFoundException(e.getMessage());
         }
