@@ -27,7 +27,7 @@ public class User {
     private String City;
     private String streetAddress;
     @Column(unique = true)
-    private Long tajNumber;
+    private String tajNumber;
     @Column(unique = true)
     private String drId;
     private String phoneNumber;
