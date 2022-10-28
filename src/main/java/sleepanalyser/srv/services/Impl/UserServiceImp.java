@@ -94,10 +94,10 @@ public class UserServiceImp implements UserService, UserDetailsService {
     }
 
     @Override
-    public boolean deleteUser(String userId) {
+    public boolean deleteUser(Long userId) {
 
         try {
-            userRepository.deleteById(Long.parseLong(userId));
+            userRepository.deleteById(userId);
         } catch (EntityNotFoundException e) {
             throw new EntityNotFoundException(e.getMessage());
         }
@@ -123,17 +123,33 @@ public class UserServiceImp implements UserService, UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public boolean changePasword(String oldPassword, String newPassword) {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = principal.toString();
         User user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("Nem található a felhasználó :" + username);
+        if (passwordEncoder.matches(oldPassword, user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+
+            return true;
         } else {
-            log.info("User found {}", username);
+
+            return false;
+            }
         }
-        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        user.getRoles().forEach(role -> {
-            authorities.add(new SimpleGrantedAuthority(role.getName()));
-        });
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
+
+        @Override
+        public UserDetails loadUserByUsername (String username) throws UsernameNotFoundException {
+            User user = userRepository.findByUsername(username);
+            if (user == null) {
+                throw new UsernameNotFoundException("Nem található a felhasználó :" + username);
+            } else {
+                log.info("User found {}", username);
+            }
+            Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+            user.getRoles().forEach(role -> {
+                authorities.add(new SimpleGrantedAuthority(role.getName()));
+            });
+            return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
+        }
     }
-}

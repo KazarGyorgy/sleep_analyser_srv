@@ -31,7 +31,9 @@ public interface UserService {
     List<User> getUsersByRoleName(String roleName);
 
 
-    boolean deleteUser(String userId);
+    boolean deleteUser(Long userId);
 
     User updateUser(String userId, User user) throws ChangeSetPersister.NotFoundException;
+
+    boolean changePasword( String oldPassword, String newPassword);
 }
