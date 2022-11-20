@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import sleepanalyser.srv.Dto.MockSleepDataDto;
+import sleepanalyser.srv.Dto.SleepingDataDTO;
 import sleepanalyser.srv.Entities.SleepingData;
 import sleepanalyser.srv.Entities.User;
 import sleepanalyser.srv.Repositories.SleepingDataRepository;
@@ -32,7 +33,7 @@ public class MockSleepDataServiceImpl implements MockSleepDataService {
      */
     public void generateData(Long userId, Date sleepStartDate) throws ParseException {
 
-    User user = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         MockSleepDataDto sleepStart = this.generateSleepStart();
         MockSleepDataDto sleepLength = this.generateSleepLength();
 
@@ -46,12 +47,15 @@ public class MockSleepDataServiceImpl implements MockSleepDataService {
                 .toLocalDateTime(); date.isBefore(endDate.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime()); date = date.plusMinutes(5)) {
-            int hr = this.generateRandom(40, 94);
-            int bloodOxigen = this.generateRandom(90, 100);
+            int hr = dataList.size() % 7 == 0
+                    ? this.generateRandom(55, 80)
+                    : this.generateRandomRefine(dataList.get(dataList.size() - 1).getHeartRate());
+
+            int bloodOxygen = this.generateBoodOxygen();
             SleepingData data = new SleepingData();
             data.setUser(user);
             data.setDate(date);
-            data.setBloodOxygen(bloodOxigen);
+            data.setBloodOxygen(bloodOxygen);
             data.setHeartRate(hr);
 
             dataList.add(data);
@@ -147,5 +151,60 @@ public class MockSleepDataServiceImpl implements MockSleepDataService {
 
         return rand;
     }
+
+    private int generateBoodOxygen() {
+        double random = Math.random();
+        int bOxygen;
+        if (random > 0.00001) {
+            bOxygen = (int) (Math.random() * 4) + 96;
+        } else {
+            bOxygen = (int) (Math.random() * 8) + 90;
+        }
+        return bOxygen;
+    }
+
+    private int generateRandomRefine(int from) {
+        int range;
+        if (Math.round(((Math.random()))) > 0.5) {
+            range = 5;
+        } else {
+            range = -5;
+        }
+        int rand = (int) (Math.round(((Math.random() * range) + from)));
+        if (rand < 37 || rand > 80) {
+            rand = 60;
+        }
+        return rand;
+    }
+
+    public List<SleepingDataDTO> calculateMovingAverage(List<SleepingDataDTO> dataList) {
+        int sum = 0;
+        int iterator;
+        for (iterator = 1; iterator < dataList.size(); iterator++) {
+            if (iterator < 3) {
+                dataList.get(iterator).setMa3(dataList.get(iterator).getHR());
+            } else {
+                int ma3 = 0;
+                ma3 = (dataList.get(iterator).getHR() + dataList.get(iterator - 1).getHR()
+                        + dataList.get(iterator - 2).getHR()) / 3;
+                dataList.get(iterator).setMa3(ma3);
+            }
+            if (iterator < 5) {
+                dataList.get(iterator).setMa5(dataList.get(iterator).getHR());
+            } else {
+                int ma5 = 0;
+                ma5 = (dataList.get(iterator).getHR() + dataList.get(iterator - 1).getHR()
+                        + dataList.get(iterator - 2).getHR()
+                        + dataList.get(iterator - 3).getHR()
+                        + dataList.get(iterator - 4).getHR()) / 5;
+                dataList.get(iterator).setMa5(ma5);
+            }
+        }
+
+        return dataList;
+    }
 }
+
+
+
 

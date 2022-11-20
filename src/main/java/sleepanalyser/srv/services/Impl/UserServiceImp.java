@@ -20,10 +20,7 @@ import sleepanalyser.srv.services.UserService;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,8 +41,13 @@ public class UserServiceImp implements UserService, UserDetailsService {
         System.out.println(generatedPassword);
         if (user.getUsername() == null || user.getPassword().isEmpty() && user.getUsername().isEmpty()) {
             user.setPassword(generatedPassword);
+            Optional<User> existingUser =userRepository.findByUsername(user.getLastName().toLowerCase().substring(0, 2) + user.getFirstName().toLowerCase());
+if(!existingUser.isPresent()){
+    user.setUsername(user.getLastName().toLowerCase().substring(0, 2) + user.getFirstName().toLowerCase());
+} else {
+    user.setUsername(user.getLastName().toLowerCase().substring(0, 2) + user.getFirstName().toLowerCase());
+}
 
-            user.setUsername(user.getLastName().toLowerCase().substring(0, 2) + user.getFirstName());
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -53,7 +55,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
         if (rolename.equals("PATIENT")) {
             String username = principal.toString();
 
-            User dr = userRepository.findByUsername(username);
+            User dr = userRepository.findByUsername(username).orElseThrow(()->new RuntimeException("User not found"));
             user.setDoctor(dr);
         }
 
@@ -77,7 +79,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
     @Override
 
     public void addUserToRole(String username, String rolename) {
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username).orElseThrow(()->new RuntimeException("User not found"));
         Role role = roleRepository.findByName(rolename);
         log.info("User " + user.getUsername() + " and the role " + role.getName() + " are under joining");
         user.getRoles().add(role);
@@ -86,7 +88,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
     @Override
     public User getUserByUsername(String username) {
         log.info("trying to get {}", username);
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsername(username).orElseThrow(()->new RuntimeException("User not found"));
     }
 
     @Override
@@ -127,9 +129,10 @@ public class UserServiceImp implements UserService, UserDetailsService {
     public boolean changePassword(String oldPassword, String newPassword) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = principal.toString();
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username).orElseThrow(()->new RuntimeException("User not found"));
         if (passwordEncoder.matches(oldPassword, user.getPassword())) {
             user.setPassword(passwordEncoder.encode(newPassword));
+//            user.setActive(true);
             userRepository.save(user);
 
             return true;
@@ -146,7 +149,7 @@ public class UserServiceImp implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username).orElseThrow(()->new RuntimeException("User not found"));
         if (user == null) {
             throw new UsernameNotFoundException("Nem található a felhasználó :" + username);
         } else {

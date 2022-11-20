@@ -6,6 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import sleepanalyser.srv.Dto.ExtendedSleepingDataDto;
 import sleepanalyser.srv.Dto.GenerateDataDTO;
 import sleepanalyser.srv.Dto.SleepingDataDTO;
 import sleepanalyser.srv.Dto.UserDetailsDTO;
@@ -21,9 +22,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Timer;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,7 +40,7 @@ public class SleepDataController {
 
 
     @GetMapping("/get/{userId}/{day}")
-    public ResponseEntity<List<SleepingDataDTO>>
+    public ResponseEntity<ExtendedSleepingDataDto>
     getUserSleepingData(@PathVariable String userId, @PathVariable String day)
             throws ParseException, IllegalArgumentException {
 
@@ -66,8 +65,17 @@ public class SleepDataController {
             sleepingDataList =
                     this.sleepDataService.getSleepingDataByUserAndDay(Long.parseLong(userId), startDate);
         }
+        List<SleepingDataDTO> dto =sleepingDataList.stream().map(this::convertToDTO).collect(Collectors.toList());
+        dto= this.mockSleepDataService.calculateMovingAverage(dto);
+        int maxOxy = dto.stream().max(Comparator.comparing(SleepingDataDTO::getBloodOxygen)).get().getBloodOxygen();
+        int minOxy = dto.stream().min(Comparator.comparing(SleepingDataDTO::getBloodOxygen)).get().getBloodOxygen();
+        Double avgOxy = dto.stream()
+                .mapToDouble(a ->a.getBloodOxygen())
+                .average().getAsDouble();
 
-        return ResponseEntity.ok().body(sleepingDataList.stream().map(this::convertToDTO).collect(Collectors.toList()));
+        ExtendedSleepingDataDto extendedSleepingDataDto = new ExtendedSleepingDataDto(dto,maxOxy,minOxy,minOxy,
+                avgOxy.toString());
+        return ResponseEntity.ok().body(extendedSleepingDataDto);
     }
 
     /**

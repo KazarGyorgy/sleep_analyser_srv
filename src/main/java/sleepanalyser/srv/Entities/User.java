@@ -33,6 +33,7 @@ public class User {
     private String phoneNumber;
     private String email;
     private Date birthdate;
+//    private boolean active;
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Role> roles = new ArrayList<>();
     @ManyToOne(fetch = FetchType.LAZY)
