@@ -38,7 +38,6 @@ public class UserServiceImp implements UserService, UserDetailsService {
         log.info("User " + user.getUsername() + "is being saved");
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         String generatedPassword = RandomStringUtils.random(15, characters);
-        System.out.println(generatedPassword);
         if (user.getUsername() == null || user.getPassword().isEmpty() && user.getUsername().isEmpty()) {
             user.setPassword(generatedPassword);
             Optional<User> existingUser =userRepository.findByUsername(user.getLastName().toLowerCase().substring(0, 2) + user.getFirstName().toLowerCase());
@@ -146,6 +145,7 @@ if(!existingUser.isPresent()){
     public Optional<User> findById(Long userId) {
         return userRepository.findById(userId);
     }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

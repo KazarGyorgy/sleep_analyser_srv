@@ -2,6 +2,8 @@ package sleepanalyser.srv.services;
 
 import org.springframework.data.crossstore.ChangeSetPersister;
 import sleepanalyser.srv.Entities.User;
+
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,4 +68,6 @@ public interface UserService {
      * @return Opitonal user.
      */
     Optional<User> findById(Long userId);
+
 }
+
