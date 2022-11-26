@@ -11,6 +11,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import sleepanalyser.srv.services.UserService;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -25,11 +26,15 @@ import java.util.stream.Collectors;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
+
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
 
-    public AuthenticationFilter(AuthenticationManager authenticationManager) {
+
+    public AuthenticationFilter(AuthenticationManager authenticationManager, UserService userService) {
         this.authenticationManager = authenticationManager;
+        this.userService = userService;
     }
 
     @Override
@@ -52,8 +57,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         Algorithm algorithm = Algorithm.HMAC256("Secret".getBytes());
         String access_token = JWT.create().withSubject(user.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 60 * 1000))
-                //access token 20 perces lejárat
                 .withIssuer(request.getRequestURL().toString())
+                .withClaim("userId", userService.getUserByUsername(user.getUsername()).getId())
                 .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toList()))
                 .sign(algorithm);

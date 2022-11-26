@@ -58,7 +58,7 @@ public class UserController {
 
     @PatchMapping("/change-password")
     public boolean changePassword(@RequestBody ChangePasswordDto dto){
-        boolean res = userService.changePasword(dto.getOldPassword(),dto.newPassword);
+        boolean res = userService.changePassword(dto.getOldPassword(),dto.newPassword);
         return res;
     }
     private UserDetailsDTO convertUserToDto(User user) {
