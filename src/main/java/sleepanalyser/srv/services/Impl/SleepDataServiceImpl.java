@@ -3,7 +3,6 @@ package sleepanalyser.srv.services.Impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sleepanalyser.srv.Dto.ExtendedSleepLengthDto;
 import sleepanalyser.srv.Dto.ExtendedSleepingDataDto;
 import sleepanalyser.srv.Dto.SleepLengthDto;
 import sleepanalyser.srv.Entities.SleepingData;
@@ -40,7 +39,7 @@ public class SleepDataServiceImpl implements SleepDataService {
     }
 
     @Override
-    public void analyseSleepingData(Long userId, ExtendedSleepingDataDto dto) {
+    public int getNormalHRByUserAge(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         int normalHRLevel;
         int userAge = this.calculateAge(user.getBirthdate(), new Date());
@@ -51,13 +50,13 @@ public class SleepDataServiceImpl implements SleepDataService {
         } else {
             normalHRLevel = 73;
         }
-        this.calculateSleepTypesLength(dto);
         log.info(normalHRLevel + "normal hr level" + "age: " + userAge);
+        return normalHRLevel;
     }
 
     @Override
     public List<SleepLengthDto> getSleepingDataByRange(Long userId, Date from, Date to) {
-       List<SleepLengthDto> sleepLengthDtos =  new ArrayList<SleepLengthDto>() ;
+        List<SleepLengthDto> sleepLengthDtos = new ArrayList<SleepLengthDto>();
 
         log.info(from + "fromdate" + to + "end date");
         for (LocalDate date = from.toInstant()
@@ -74,7 +73,7 @@ public class SleepDataServiceImpl implements SleepDataService {
 
             float lengthOfSleep = 0.00F;
 
-            lengthOfSleep =  (float) (sleepingData.size() * 5) / 60;
+            lengthOfSleep = (float) (sleepingData.size() * 5) / 60;
 
             dto.setLengthOfSleep(lengthOfSleep);
             sleepLengthDtos.add(dto);
@@ -107,21 +106,27 @@ public class SleepDataServiceImpl implements SleepDataService {
         }
     }
 
-    public void calculateSleepTypesLength(ExtendedSleepingDataDto dto) {
+    public ExtendedSleepingDataDto calculateSleepTypesLength(ExtendedSleepingDataDto dto, int normalHrLevel) {
         AtomicInteger deep = new AtomicInteger();
-        int light = 0;
+        AtomicInteger light = new AtomicInteger();
         AtomicInteger rem = new AtomicInteger();
         dto.getSleepingData().forEach((data) -> {
             if (data.getMa3() != null && data.getMa5() != null) {
-                if (data.getMa3() > data.getMa5()) {
+                if (data.getHR() < normalHrLevel & data.getMa3() > data.getMa5()) {
                     rem.addAndGet(5);
-                } else {
+                } else if (data.getHR() < normalHrLevel & data.getMa3() < data.getMa5()) {
                     deep.addAndGet(5);
-                }
+                } else light.addAndGet(5);
+            } else {
+                light.addAndGet(5);
             }
         });
-
-        log.info("deep" + deep + "rem" + rem);
+        dto.setDeep((float)deep.get()/60);
+        dto.setRem((float) rem.get()/60);
+        dto.setLight((float) light.get()/60);
+        dto.setLengthOfSleep((float) (light.get() + deep.get() + rem.get())/60);
+        log.info("deep" + deep + "rem" + rem + "light" + light);
+        return dto;
     }
 
 }

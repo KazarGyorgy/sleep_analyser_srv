@@ -16,6 +16,7 @@ public interface SleepDataService {
 
     List<SleepingData> getSleepingDataByUserAndDay(Long userId, Date day);
 
-    void analyseSleepingData(Long userId, ExtendedSleepingDataDto dto);
+    int getNormalHRByUserAge(Long userId);
     List<SleepLengthDto> getSleepingDataByRange(Long userId, Date from, Date to);
+    ExtendedSleepingDataDto calculateSleepTypesLength(ExtendedSleepingDataDto dto, int normalHrLevel);
 }

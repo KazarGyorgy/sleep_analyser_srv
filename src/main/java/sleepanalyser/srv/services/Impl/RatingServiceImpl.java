@@ -1,5 +1,6 @@
 package sleepanalyser.srv.services.Impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -9,7 +10,14 @@ import sleepanalyser.srv.Entities.User;
 import sleepanalyser.srv.Repositories.RatingRepository;
 import sleepanalyser.srv.Repositories.UserRepository;
 import sleepanalyser.srv.services.RatingService;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.Optional;
+
+
 @Service
+@Slf4j
 public class RatingServiceImpl implements RatingService {
     @Autowired
     RatingRepository ratingRepository;
@@ -26,5 +34,16 @@ public class RatingServiceImpl implements RatingService {
         rating.setRating(dto.getRating());
         rating.setUser(user);
        return this.ratingRepository.save(rating);
+    }
+
+    @Override
+    public Optional<Rating> getByDateAndUser(Date date, String userId) {
+        LocalDate endDate =date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate().plusDays(1);
+
+
+    return ratingRepository.findByDateBetweenAndUserId(date,java.sql.Date.valueOf(endDate),Long.parseLong(userId));
+
     }
 }

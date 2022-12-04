@@ -5,7 +5,10 @@ import org.springframework.stereotype.Repository;
 import sleepanalyser.srv.Entities.Rating;
 
 import java.util.Date;
+import java.util.Optional;
+
 @Repository
 public interface RatingRepository extends JpaRepository<Rating, Long> {
-    Rating findByDateAndUserId(Date Date, Long userId);
+
+    Optional<Rating> findByDateBetweenAndUserId(Date startDate, Date endDate, Long userId);
 }

@@ -12,5 +12,10 @@ public class ExtendedSleepingDataDto{
     private int maxOxygen;
     private int minOxygen;
     private int averageOxygen;
-    private String lengthOfSleep;
+    private float rem;
+    private float deep;
+    private float light;
+    private float lengthOfSleep;
+    private int rating;
+    private String ratingMessage;
 }

@@ -61,7 +61,6 @@ public class RoleController {
 
     @GetMapping("/refresh-token")
     public void refreshExpiredToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        System.out.println("refreshing token");
         String authorizationHeader = request.getHeader(AUTHORIZATION);
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 

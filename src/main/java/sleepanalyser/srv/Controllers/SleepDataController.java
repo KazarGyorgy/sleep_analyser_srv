@@ -79,10 +79,18 @@ public  ResponseEntity<RatingDTO> saveRating(@RequestBody RatingDTO dto){
                 .mapToDouble(a -> a.getBloodOxygen())
                 .average().getAsDouble();
 
-        ExtendedSleepingDataDto extendedSleepingDataDto = new ExtendedSleepingDataDto(dto, maxOxy, minOxy, minOxy,
-                avgOxy.toString());
-        this.sleepDataService.analyseSleepingData(Long.parseLong(userId), extendedSleepingDataDto);
-        return ResponseEntity.ok().body(extendedSleepingDataDto);
+        ExtendedSleepingDataDto extendedSleepingDataDto = new ExtendedSleepingDataDto(dto, maxOxy, minOxy,
+                (int) Math.round(avgOxy), 0, 0, 0, 0, 0, "");
+
+
+        int normalHr = this.sleepDataService.getNormalHRByUserAge((Long.parseLong(userId)));
+
+       Optional<Rating> rating = this.ratingService.getByDateAndUser(startDate, userId);
+       if(rating.isPresent()) {
+           extendedSleepingDataDto.setRating(rating.get().getRating());
+           extendedSleepingDataDto.setRatingMessage(rating.get().getRatingMessage());
+       }
+        return ResponseEntity.ok().body( this.sleepDataService.calculateSleepTypesLength(extendedSleepingDataDto,normalHr));
     }
 
     @GetMapping("/get/weekly/{userId}/{day}")
